@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_home"
+            android:icon="@drawable/ic_baseline_home_24"
+            android:title="Home" />
+        <item
+            android:id="@+id/nav_cart"
+            android:icon="@drawable/ic_baseline_shopping_cart_24"
+            android:title="Cart" />
+        <item
+            android:id="@+id/nav_favourite"
+            android:icon="@drawable/ic_baseline_favorite_24"
+            android:title="Favourite" />
+        <item android:title="Orther">
+            <menu>
+                <group android:checkableBehavior="single">
+                    <item
+                        android:id="@+id/changepass"
+                        android:icon="@drawable/ic_baseline_change_circle_24"
+                        android:title="Change Password" />
+                    <item
+                        android:id="@+id/info"
+                        android:icon="@drawable/ic_baseline_info_24"
+                        android:title="Infomation" />
+                    <item
+                        android:id="@+id/exit"
+                        android:icon="@drawable/ic_baseline_exit_to_app_24"
+                        android:title="Exit" />
+                </group>
+            </menu>
+        </item>
+    </group>
+
+</menu>
