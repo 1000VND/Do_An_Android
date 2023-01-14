@@ -7,15 +7,16 @@
         <item
             android:id="@+id/nav_home"
             android:icon="@drawable/ic_baseline_home_24"
-            android:title="Home" />
-        <item
-            android:id="@+id/nav_cart"
-            android:icon="@drawable/ic_baseline_shopping_cart_24"
-            android:title="Cart" />
+            android:title="Home"
+            android:checked="true"/>
         <item
             android:id="@+id/nav_favourite"
             android:icon="@drawable/ic_baseline_favorite_24"
             android:title="Favourite" />
+        <item
+            android:id="@+id/nav_order"
+            android:icon="@drawable/ic_baseline_favorite_24"
+            android:title="Order" />
         <item android:title="Orther">
             <menu>
                 <group android:checkableBehavior="single">

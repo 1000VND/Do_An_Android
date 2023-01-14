@@ -1,6 +1,10 @@
 package com.example.appbanhang.activity;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.content.Context;
 import android.content.Intent;
@@ -17,27 +21,31 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.appbanhang.R;
-import com.example.appbanhang.dao.AccountDAO;
 import com.example.appbanhang.fragment.HomeFragment;
 import com.example.appbanhang.model.AccountModel;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
 
 public class LoginActivity extends AppCompatActivity {
     TextInputEditText txtEmail, txtPass;
     TextInputLayout loEmail, loPass;
     Button loginbtn, signupbtn;
-    AccountDAO accountDAO;
     AccountModel accountModel;
     Intent intent;
     TextView txtForgotpaw;
+    FirebaseAuth auth;
+    ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         initView();
-        initControll();
+        progressBar.setVisibility(View.GONE);
 
         loginbtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -70,7 +78,7 @@ public class LoginActivity extends AppCompatActivity {
         txtPass.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
-                if (keyCode==KeyEvent.KEYCODE_ENTER){
+                if (keyCode == KeyEvent.KEYCODE_ENTER) {
                     locginAction();
                 }
                 return false;
@@ -112,22 +120,29 @@ public class LoginActivity extends AppCompatActivity {
                 loPass.setError("Have not entered Password");
                 loEmail.setError(null);
             } else {
-                String email = txtEmail.getText().toString().trim();
-                String pass = txtPass.getText().toString().trim();
-                accountDAO = new AccountDAO();
-                accountModel = accountDAO.CheckPass(email, pass);
-                if (accountModel != null) {
-                    Toast.makeText(LoginActivity.this, "Login successfull", Toast.LENGTH_SHORT).show();
-                    txtEmail.setText("");
-                    txtPass.setText("");
-                    intent = new Intent(getApplicationContext(), MainActivity.class);
-                    finishAffinity();
-                    startActivity(intent);
-                } else {
-                    Toast.makeText(LoginActivity.this, "Login failed", Toast.LENGTH_SHORT).show();
-                    txtPass.setText("");
-                    txtEmail.setText("");
-                }
+                String email = txtEmail.getText().toString();
+                String pass = txtPass.getText().toString();
+
+                auth.signInWithEmailAndPassword(email, pass)
+                        .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                            @Override
+                            public void onComplete(@NonNull Task<AuthResult> task) {
+                                if (task.isSuccessful()) {
+                                    Toast.makeText(LoginActivity.this, "Login successfull", Toast.LENGTH_SHORT).show();
+                                    progressBar.setVisibility(View.GONE);
+                                    txtEmail.setText("");
+                                    txtPass.setText("");
+                                    intent = new Intent(getApplicationContext(), MainActivity.class);
+                                    finishAffinity();
+                                    startActivity(intent);
+                                } else {
+                                    Toast.makeText(LoginActivity.this, "Error:" + task.getException(), Toast.LENGTH_SHORT).show();
+                                    progressBar.setVisibility(View.GONE);
+                                    txtPass.setText("");
+                                    txtEmail.setText("");
+                                }
+                            }
+                        });
                 txtEmail.clearFocus();
                 txtPass.clearFocus();
                 loEmail.setError(null);
@@ -137,6 +152,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void initView() {
+        progressBar = findViewById(R.id.progressbar);
         txtEmail = findViewById(R.id.email);
         txtPass = findViewById(R.id.password);
         loEmail = findViewById(R.id.emaillayout);
@@ -144,9 +160,7 @@ public class LoginActivity extends AppCompatActivity {
         loginbtn = findViewById(R.id.loginbtn);
         signupbtn = findViewById(R.id.signupbtn);
         txtForgotpaw = findViewById(R.id.forgotpassword);
-    }
-
-    private void initControll() {
+        auth = FirebaseAuth.getInstance();
     }
 
     boolean isConnected() {
@@ -163,5 +177,12 @@ public class LoginActivity extends AppCompatActivity {
             return false;
     }
 
+    private void replaceFragment(Fragment fragment) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.framelayout, fragment);
+        fragmentTransaction.commit();
+
+    }
 
 }

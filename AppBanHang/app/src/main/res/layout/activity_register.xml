@@ -137,5 +137,14 @@
         android:minHeight="55dp"
         android:text="Register new account"></com.google.android.material.button.MaterialButton>
 
+    <ProgressBar
+        android:id="@+id/progressbar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/registerbtn"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="5dp"
+        />
+
 
 </RelativeLayout>

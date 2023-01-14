@@ -1,5 +1,6 @@
 package com.example.appbanhang.activity;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
@@ -9,41 +10,45 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.example.appbanhang.R;
-import com.example.appbanhang.dao.AccountDAO;
 import com.example.appbanhang.model.AccountModel;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class RegisterActivity extends AppCompatActivity {
-    TextInputEditText username, email, mobile, pass, repass;
-    TextInputLayout lusername, lemail, lmobile, lpass, lrepass;
+    TextInputEditText userName, Email, Mobile, Pass, rePass;
     Button button;
+    FirebaseAuth auth;
+    FirebaseDatabase firebaseDatabase;
+    ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
         initView();
+        progressBar.setVisibility(View.GONE);
         initControl();
     }
 
     private void initView() {
-        username = findViewById(R.id.username);
-        email = findViewById(R.id.email);
-        mobile = findViewById(R.id.mobile);
-        pass = findViewById(R.id.password);
-        repass = findViewById(R.id.repass);
-
+        progressBar = findViewById(R.id.progressbar);
+        userName = findViewById(R.id.username);
+        Email = findViewById(R.id.email);
+        Mobile = findViewById(R.id.mobile);
+        Pass = findViewById(R.id.password);
+        rePass = findViewById(R.id.repass);
         button = findViewById(R.id.registerbtn);
-
-        lusername = findViewById(R.id.usernamelayout);
-        lemail = findViewById(R.id.emaillayout);
-        lmobile = findViewById(R.id.mobilelayout);
-        lpass = findViewById(R.id.passwordlayout);
-        lrepass = findViewById(R.id.repasslayout);
+        auth = FirebaseAuth.getInstance();
+        firebaseDatabase = FirebaseDatabase.getInstance();
     }
 
     private void initControl() {
@@ -54,7 +59,8 @@ public class RegisterActivity extends AppCompatActivity {
                     if (!isConnected()) {
                         Toast.makeText(getApplicationContext(), "Internet not availble. Check your internet", Toast.LENGTH_SHORT).show();
                     } else {
-                        dangKi();
+                        createUser();
+                        progressBar.setVisibility(View.VISIBLE);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -64,56 +70,59 @@ public class RegisterActivity extends AppCompatActivity {
 
     }
 
-    private void dangKi() throws Exception {
-        String str_username = username.getText().toString().trim();
-        String str_email = email.getText().toString().trim();
-        String str_mobile = mobile.getText().toString().trim();
-        String str_pass = pass.getText().toString().trim();
-        String str_repass = repass.getText().toString().trim();
+    private void createUser() throws Exception {
+        String str_username = userName.getText().toString();
+        String str_email = Email.getText().toString();
+        String str_mobile = Mobile.getText().toString();
+        String str_pass = Pass.getText().toString();
+        String str_repass = rePass.getText().toString();
         if (TextUtils.isEmpty(str_username)) {
             Toast.makeText(RegisterActivity.this, "Have not entered Username", Toast.LENGTH_SHORT).show();
-        } else if (TextUtils.isEmpty(str_email)) {
-            Toast.makeText(RegisterActivity.this, "Have not entered Email", Toast.LENGTH_SHORT).show();
-        } else if (TextUtils.isEmpty(str_mobile)) {
-            Toast.makeText(RegisterActivity.this, "Have not entered Mobile", Toast.LENGTH_SHORT).show();
-        } else if (TextUtils.isEmpty(str_pass)) {
-            Toast.makeText(RegisterActivity.this, "Have not entered Password", Toast.LENGTH_SHORT).show();
-        } else if (TextUtils.isEmpty(str_repass)) {
-            Toast.makeText(RegisterActivity.this, "Have not entered RePassword", Toast.LENGTH_SHORT).show();
-        } else {
-            if (str_pass.equals(str_repass)) {
-                AccountDAO dao = new AccountDAO();
-                AccountModel exitsEmail = dao.CheckEmail(email.getText().toString().trim());
-                if (exitsEmail != null) {
-                    Toast.makeText(getApplicationContext(), "Email already exists", Toast.LENGTH_SHORT).show();
-                    email.setText("");
-                } else {
-                    AccountModel data = accountModel();
-                    if (dao.AddAccount(data)) {
-                        Toast.makeText(getApplicationContext(), "Create account susscess", Toast.LENGTH_SHORT).show();
-                        username.setText("");
-                        email.setText("");
-                        mobile.setText("");
-                        pass.setText("");
-                        repass.setText("");
-                    } else {
-                        Toast.makeText(getApplicationContext(), "Create account failed", Toast.LENGTH_SHORT).show();
-                    }
-                }
-            } else {
-                Toast.makeText(getApplicationContext(), "Confirmation password is incorrect", Toast.LENGTH_SHORT).show();
-                repass.clearComposingText();
-            }
+            return;
         }
-    }
+        if (TextUtils.isEmpty(str_email)) {
+            Toast.makeText(RegisterActivity.this, "Have not entered Email", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (TextUtils.isEmpty(str_mobile)) {
+            Toast.makeText(RegisterActivity.this, "Have not entered Mobile", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (TextUtils.isEmpty(str_pass)) {
+            Toast.makeText(RegisterActivity.this, "Have not entered Password", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (TextUtils.isEmpty(str_repass)) {
+            Toast.makeText(RegisterActivity.this, "Have not entered RePassword", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (!str_pass.equals(str_repass)) {
+            Toast.makeText(getApplicationContext(), "Confirmation password is incorrect", Toast.LENGTH_SHORT).show();
+            rePass.clearComposingText();
+            return;
+        }
 
-    private AccountModel accountModel() {
-        AccountModel ac = new AccountModel();
-        ac.setUserName(username.getText().toString());
-        ac.setEmail(email.getText().toString());
-        ac.setPhone(mobile.getText().toString());
-        ac.setPassWord(pass.getText().toString());
-        return ac;
+        auth.createUserWithEmailAndPassword(str_email, str_pass)
+                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            AccountModel accountModel = new AccountModel(str_username, str_email, str_mobile, str_pass);
+                            String id = task.getResult().getUser().getUid();
+                            firebaseDatabase.getReference().child("Users").child(id).setValue(accountModel);
+                            progressBar.setVisibility(View.GONE);
+                            Toast.makeText(RegisterActivity.this, "Create account susscessfull", Toast.LENGTH_SHORT).show();
+                            userName.setText("");
+                            Email.setText("");
+                            Mobile.setText("");
+                            Pass.setText("");
+                            rePass.setText("");
+                        } else {
+                            progressBar.setVisibility(View.GONE);
+                            Toast.makeText(RegisterActivity.this, "Error:" + task.getException(), Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
     }
 
     boolean isConnected() {

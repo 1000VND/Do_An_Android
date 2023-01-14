@@ -16,15 +16,19 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="60dp"
-            android:background="#6bae7c"
-            app:title="Android"
-            app:titleTextColor="@color/white" />
+            android:background="@drawable/header_bg1"
+            app:title="Shoes shopping"
+            app:titleTextColor="@color/black" />
 
         <FrameLayout
             android:id="@+id/framelayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@+id/toolbar"/>
+            android:layout_below="@+id/toolbar">
+
+        </FrameLayout>
+
+
     </RelativeLayout>
 
     <com.google.android.material.navigation.NavigationView
@@ -38,8 +42,7 @@
         app:itemIconTint="@drawable/nav_selected"
         app:itemTextAppearance="@style/TextViewStyle"
         app:itemTextColor="@drawable/nav_selected"
-        app:menu="@menu/item_file">
-    </com.google.android.material.navigation.NavigationView>
+        app:menu="@menu/item_file"></com.google.android.material.navigation.NavigationView>
 
 
 </androidx.drawerlayout.widget.DrawerLayout>

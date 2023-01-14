@@ -1,7 +1,8 @@
 package com.example.appbanhang.model;
 
+import com.google.android.material.textfield.TextInputEditText;
+
 public class AccountModel {
-    private int Id;
     private String UserName;
     private String Email;
     private String Phone;
@@ -10,20 +11,11 @@ public class AccountModel {
     public AccountModel() {
     }
 
-    public AccountModel(int id, String userName, String email, String phone, String passWord) {
-        Id = id;
+    public AccountModel(String userName, String email, String phone, String passWord) {
         UserName = userName;
         Email = email;
         Phone = phone;
         PassWord = passWord;
-    }
-
-    public int getId() {
-        return Id;
-    }
-
-    public void setId(int id) {
-        Id = id;
     }
 
     public String getUserName() {
